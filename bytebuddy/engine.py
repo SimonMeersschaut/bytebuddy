@@ -1,22 +1,31 @@
 import pygame
 import threading
 import time
-pygame.init()
 
 class Engine:
-  def __init__(self):
-    self.screen = pygame.display.set_mode([500, 500])
-  
-  def start(self):
-    t1 = threading.Thread(target=self.render_deamon)
-    t1.start()
+  def start(self, bot):
+    self.bot = bot
+    self.t1 = threading.Thread(target=self.render_deamon)
+    self.t1.start()
+    time.sleep(1)
   
   def render_deamon(self):
-    while True:
+    pygame.init()
+    self.screen = pygame.display.set_mode([500, 500])
+    running = True
+    while running:
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+      
       self.render_frame()
-      time.sleep(.5)
+    time.sleep(0.5)
   
   def render_frame(self):
     self.screen.fill((255, 255, 255))
-    pygame.draw.circle(self.screen, (0, 0, 255), (250, 250), 75)
+    self.bot.update()
+    self.bot.render(self)
     pygame.display.flip()
+  
+  def render_circle(self, color, position, radius):
+    pygame.draw.circle(self.screen, color, position, radius)
