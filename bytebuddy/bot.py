@@ -1,17 +1,24 @@
+import math
+import time
+
 user_actions = []
 class Bot:
   def __init__(self):
     self.x, self.y = (0, 0)
-    self.update_functions_generators = []
+    self.direction = (1, 0)
     self.tasks_done = []
     # self.
   
   def user_action(func):
     def inner_decorator(*args, **kwargs):
       # add the action to the update-handler
+      output = func(*args, **kwargs)
+
+      # after task is complete
       self = args[0]
-      output = self.update_functions_generators.append(func(*args, **kwargs))
-      print([func.__name__ for func in self.update_functions_generators])
+      self.tasks_done.append(func)
+
+      time.sleep(.5)
       # return the output from the main action
       return output
     
@@ -26,29 +33,40 @@ class Bot:
     return user_actions
   
   def render(self, engine):
-    engine.render_circle((0, 0, 255), (self.x, self.y), 75)
+    engine.render_circle((0, 0, 255), (self.x, self.y), 10)
+
+    # render status
+    for i, finished_task in enumerate(self.tasks_done):
+      engine.render_text(finished_task.__name__, (100, 20+20*i), (120, 120, 120))
+
   
   def update(self):
-    # for update_function_generator in self.update_functions_generators:
-    try:
-      try:
-        self.update_functions_generators[0].__next__()
-      except IndexError:
-        pass
-    except StopIteration:
-      self.tasks_done.append(self.update_functions_generators[0])
-      self.update_functions_generators.remove(self.update_functions_generators[0])
-    
-  
+    pass
+
+  #######################
   # define user actions # 
+  #######################
 
   @user_action
   def move_forward(self):
-    '''vooruit'''
-    for _ in range(10000):
-      self.x += .02
-      yield
+    for _ in range(1000):
+      self.x += self.direction[0]*0.05
+      self.y += self.direction[1]*0.05
     return
+  
+  @user_action
+  def turn_right(self):
+    SPEED = 5000
+    if self.direction[0] == 1:
+      self.direction = (0, 1)
+    elif self.direction[1] == 1:
+      self.direction = (-1, 0)
+    elif self.direction[0] == -1:
+      self.direction = (0, -1)
+    elif self.direction[1] == 1:
+      self.direction = (1, 0)
+    return
+  
   
   
 
